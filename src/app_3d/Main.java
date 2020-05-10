@@ -1,5 +1,6 @@
 package app_3d;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -130,19 +131,33 @@ public class Main extends Application {
         primaryStage.setTitle("Genuine Coder");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                pointLight.setRotate(pointLight.getRotate()+1);
+            }
+        };
+        timer.start();
     }
+
+   private final PointLight pointLight = new PointLight();
 
     private Node[] prepareLightSource() {
 //        AmbientLight ambientLight = new AmbientLight();
 //        ambientLight.setColor(Color.AQUA);
 //        return ambientLight;
 
-        PointLight pointLight = new PointLight();
+
         pointLight.setColor(Color.RED);
         pointLight.getTransforms().add(new Translate(0,-50,100));
+        pointLight.setRotationAxis(Rotate.X_AXIS);
 
         Sphere sphere = new Sphere(2);
         sphere.getTransforms().setAll(pointLight.getTransforms());
+        sphere.rotateProperty().bind(pointLight.rotateProperty());
+        sphere.rotationAxisProperty().bind(pointLight.rotationAxisProperty());
+
         return new Node[]{pointLight,sphere};
     }
 }
