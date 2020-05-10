@@ -85,8 +85,8 @@ public class Main extends Application {
             Image image2 = new Image(new File("texture3.jpg").toURI().toString());
             material.setDiffuseMap(image1);
            // material.setSpecularMap(image2);
-
-            material.setSelfIlluminationMap(new Image(new File("texture-background.jpg").toURI().toString()));
+          //  material.setSelfIlluminationMap(new Image(new File("texture-background.jpg").toURI().toString()));
+            material.setBumpMap(image2);
 
         Box box = new Box(100,20,50);
         box.setMaterial(material);
@@ -107,8 +107,8 @@ public class Main extends Application {
 
         SmartGroup group = new SmartGroup();
         group.getChildren().add(box);
-       //group.getChildren().addAll(prepareLightSource());
-        group.getChildren().add(new PointLight());
+        group.getChildren().addAll(prepareLightSource());
+      //  group.getChildren().add(new PointLight());
 
         Camera camera = new PerspectiveCamera();
         Scene scene = new Scene(group, WIDTH, HEIGHT);
