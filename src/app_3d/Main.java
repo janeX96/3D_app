@@ -74,24 +74,6 @@ public class Main extends Application {
         });
     }
 
-    private Box prepareBox()
-    {
-        //nakładanie tekstury
-        PhongMaterial material = new PhongMaterial();
-
-       // material.setDiffuseColor(Color.ROYALBLUE);
-
-            Image image1 = new Image(new File("wood.jpg").toURI().toString());
-            Image image2 = new Image(new File("texture3.jpg").toURI().toString());
-            material.setDiffuseMap(image1);
-           // material.setSpecularMap(image2);
-          //  material.setSelfIlluminationMap(new Image(new File("texture-background.jpg").toURI().toString()));
-          //  material.setBumpMap(image2);
-
-        Box box = new Box(100,20,50);
-        box.setMaterial(material);
-        return box;
-    }
 
 
     public static void main(String[] args) {
@@ -100,44 +82,35 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        //Sphere sphere = new Sphere(50);
-
-        Box box = prepareBox();
-
-        SmartGroup group = new SmartGroup();
-        group.getChildren().add(box);
-        group.getChildren().add(prepareSecondBox());
-        group.getChildren().addAll(prepareLightSource());
-        group.getChildren().add(new AmbientLight());
-      //  group.getChildren().add(new PointLight());
-
-        Camera camera = new PerspectiveCamera();
-        Scene scene = new Scene(group, WIDTH, HEIGHT,true);
+        
+        Camera camera = new PerspectiveCamera(true);
+        camera.setNearClip(1);
+        camera.setFarClip(1000);
+        camera.translateZProperty().set(-1000);
+        
+        SmartGroup world = new SmartGroup();
+        world.getChildren().add(prepareEarth());
+        
+        Scene scene = new Scene(world, WIDTH, HEIGHT,true);
         scene.setFill(Color.SILVER);
         scene.setCamera(camera);
 
-        group.translateXProperty().set(WIDTH / 2);
-        group.translateYProperty().set(HEIGHT / 2);
-        group.translateZProperty().set(-1000);
-
-//        Transform transform = new Rotate(65,new Point3D(0,1,0));
-//        box.getTransforms().add(transform);
-
-        initMouseControl(group,scene);
 
 
-        primaryStage.setTitle("Genuine Coder");
+        primaryStage.setTitle("Earth Simulation");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        AnimationTimer timer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
-                pointLight.setRotate(pointLight.getRotate()+1);
-            }
-        };
-        timer.start();
+
+    }
+
+    private Node prepareEarth() {
+        PhongMaterial material = new PhongMaterial();
+        material.setDiffuseMap(new Image(new File("earth-texture.jpg").toURI().toString()));
+        Sphere sphere = new Sphere(150);
+        sphere.setMaterial(material);
+
+        return sphere;
     }
 
     private Node prepareSecondBox() {
