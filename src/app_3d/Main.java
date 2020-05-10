@@ -86,7 +86,7 @@ public class Main extends Application {
             material.setDiffuseMap(image1);
            // material.setSpecularMap(image2);
           //  material.setSelfIlluminationMap(new Image(new File("texture-background.jpg").toURI().toString()));
-            material.setBumpMap(image2);
+          //  material.setBumpMap(image2);
 
         Box box = new Box(100,20,50);
         box.setMaterial(material);
@@ -107,11 +107,13 @@ public class Main extends Application {
 
         SmartGroup group = new SmartGroup();
         group.getChildren().add(box);
+        group.getChildren().add(prepareSecondBox());
         group.getChildren().addAll(prepareLightSource());
+        group.getChildren().add(new AmbientLight());
       //  group.getChildren().add(new PointLight());
 
         Camera camera = new PerspectiveCamera();
-        Scene scene = new Scene(group, WIDTH, HEIGHT);
+        Scene scene = new Scene(group, WIDTH, HEIGHT,true);
         scene.setFill(Color.SILVER);
         scene.setCamera(camera);
 
@@ -138,7 +140,21 @@ public class Main extends Application {
         timer.start();
     }
 
-   private final PointLight pointLight = new PointLight();
+    private Node prepareSecondBox() {
+        PhongMaterial material = new PhongMaterial();
+
+
+
+        Image image1 = new Image(new File("wood.jpg").toURI().toString());
+        Image image2 = new Image(new File("texture3.jpg").toURI().toString());
+        material.setDiffuseMap(image1);
+
+        Box box = new Box(20,100,100);
+        box.setMaterial(material);
+        return box;
+    }
+
+    private final PointLight pointLight = new PointLight();
 
     private Node[] prepareLightSource() {
 //        AmbientLight ambientLight = new AmbientLight();
