@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
@@ -37,8 +38,11 @@ public class Main extends Application {
     private double anchorAngleY;
     private final DoubleProperty angleX = new SimpleDoubleProperty(0);
     private final DoubleProperty angleY = new SimpleDoubleProperty(0);
+    private final PointLight pointLight = new PointLight();
 
-    private void initMouseControl(SmartGroup smartGroup, Scene scene)
+
+    private final Sphere sphere = new Sphere(150);
+    private void initMouseControl(SmartGroup smartGroup, Scene scene,Stage stage)
     {
         Rotate xRotate;
         Rotate yRotate;
@@ -64,14 +68,83 @@ public class Main extends Application {
             angleY.set(anchorAngleY + anchorX-event.getSceneX());
         });
 
-        //zoom za pomocą scrolla
-        scene.setOnScroll(event -> {
-            if (event.getDeltaY() >0)
-                smartGroup.translateZProperty().set(smartGroup.getTranslateZ() + 100);
-
-            if (event.getDeltaY() <0)
-               smartGroup.translateZProperty().set(smartGroup.getTranslateZ() - 100);
+        stage.addEventHandler(ScrollEvent.SCROLL, event -> {
+            double delta = event.getDeltaY();
+            smartGroup.translateZProperty().set(smartGroup.getTranslateZ() + delta);
         });
+    }
+
+
+    private Node prepareEarth() {
+        PhongMaterial material = new PhongMaterial();
+        material.setDiffuseMap(new Image(new File("earth-texture.jpg").toURI().toString()));
+        // material.setSpecularColor(Color.WHITE);
+        material.setSelfIlluminationMap(new Image(new File("earth_nightmap.jpg").toURI().toString()));
+
+        material.setBumpMap(new Image(new File("earth_bump.tif").toURI().toString()));
+        material.setSpecularMap(new Image(new File("spec_map.jpg").toURI().toString()));
+
+        sphere.setRotationAxis(Rotate.Y_AXIS);
+        sphere.setMaterial(material);
+
+        return sphere;
+    }
+
+    private void prepareAnimation()
+    {
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                sphere.rotateProperty().set(sphere.getRotate() +0.2);
+            }
+        };
+        timer.start();
+    }
+
+    private ImageView prepareImageView()
+    {
+        Image image = new Image(new File("space_background1.jpg").toURI().toString());
+        ImageView imageView = new ImageView(image);
+        imageView.setPreserveRatio(true);
+
+        imageView.getTransforms().add(new Translate(-image.getWidth()/2, -image.getHeight()/2,0));
+        return imageView;
+    }
+
+
+
+
+//    private Node prepareSecondBox() {
+//        PhongMaterial material = new PhongMaterial();
+//
+//
+//
+//        Image image1 = new Image(new File("wood.jpg").toURI().toString());
+//        Image image2 = new Image(new File("texture3.jpg").toURI().toString());
+//        material.setDiffuseMap(image1);
+//
+//        Box box = new Box(20,100,100);
+//        box.setMaterial(material);
+//        return box;
+//    }
+
+
+    private Node[] prepareLightSource() {
+//        AmbientLight ambientLight = new AmbientLight();
+//        ambientLight.setColor(Color.AQUA);
+//        return ambientLight;
+
+
+        //pointLight.setColor(Color.RED);
+        pointLight.getTransforms().add(new Translate(200,-500,100));
+        pointLight.setRotationAxis(Rotate.X_AXIS);
+
+        Sphere sphere = new Sphere(2);
+        sphere.getTransforms().setAll(pointLight.getTransforms());
+        sphere.rotateProperty().bind(pointLight.rotateProperty());
+        sphere.rotationAxisProperty().bind(pointLight.rotationAxisProperty());
+
+        return new Node[]{pointLight,sphere};
     }
 
 
@@ -85,13 +158,21 @@ public class Main extends Application {
         
         Camera camera = new PerspectiveCamera(true);
         camera.setNearClip(1);
-        camera.setFarClip(1000);
-        camera.translateZProperty().set(-1000);
-        
+        camera.setFarClip(10000);
+        camera.translateZProperty().set(-3800);
+
         SmartGroup world = new SmartGroup();
         world.getChildren().add(prepareEarth());
-        
-        Scene scene = new Scene(world, WIDTH, HEIGHT,true);
+
+        Group root = new Group();
+
+       root.getChildren().add(world);
+       root.getChildren().add(prepareImageView());
+
+        prepareAnimation();
+      //  world.getChildren().addAll(prepareLightSource());
+
+        Scene scene = new Scene(root, WIDTH, HEIGHT,true);
         scene.setFill(Color.SILVER);
         scene.setCamera(camera);
 
@@ -101,51 +182,10 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-
+        initMouseControl(world,scene,primaryStage);
     }
 
-    private Node prepareEarth() {
-        PhongMaterial material = new PhongMaterial();
-        material.setDiffuseMap(new Image(new File("earth-texture.jpg").toURI().toString()));
-        Sphere sphere = new Sphere(150);
-        sphere.setMaterial(material);
 
-        return sphere;
-    }
-
-    private Node prepareSecondBox() {
-        PhongMaterial material = new PhongMaterial();
-
-
-
-        Image image1 = new Image(new File("wood.jpg").toURI().toString());
-        Image image2 = new Image(new File("texture3.jpg").toURI().toString());
-        material.setDiffuseMap(image1);
-
-        Box box = new Box(20,100,100);
-        box.setMaterial(material);
-        return box;
-    }
-
-    private final PointLight pointLight = new PointLight();
-
-    private Node[] prepareLightSource() {
-//        AmbientLight ambientLight = new AmbientLight();
-//        ambientLight.setColor(Color.AQUA);
-//        return ambientLight;
-
-
-        pointLight.setColor(Color.RED);
-        pointLight.getTransforms().add(new Translate(0,-50,100));
-        pointLight.setRotationAxis(Rotate.X_AXIS);
-
-        Sphere sphere = new Sphere(2);
-        sphere.getTransforms().setAll(pointLight.getTransforms());
-        sphere.rotateProperty().bind(pointLight.rotateProperty());
-        sphere.rotationAxisProperty().bind(pointLight.rotationAxisProperty());
-
-        return new Node[]{pointLight,sphere};
-    }
 }
 
 
